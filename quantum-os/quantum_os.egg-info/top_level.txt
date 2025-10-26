@@ -1,0 +1,15 @@
+algorithms
+backends
+classical
+compiler
+config
+core
+error_correction
+gpu
+network
+plugins
+quantum-env
+quantum_echoes
+security
+tensorflow-quantum
+utils
