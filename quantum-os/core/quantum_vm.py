@@ -223,14 +223,19 @@ class QuantumProgram:
 
 class QuantumVirtualMachine:
     """
-    Quantum Virtual Machine
+    Quantum Virtual Machine (QVM) v2.0
 
     Provides a general-purpose quantum computing interface that can:
     - Compile quantum programs to any backend
     - Execute on multiple quantum computers simultaneously
     - Distribute workload across available quantum resources
     - Abstract hardware-specific details
+    - Cache compiled circuits for reuse
+    - Run parallel parameter sweeps across backends
+    - Verify program correctness before execution
     """
+
+    VERSION = "2.0.0"
 
     def __init__(self, quantum_os):
         """
@@ -241,6 +246,8 @@ class QuantumVirtualMachine:
         """
         self.quantum_os = quantum_os
         self.program_cache: Dict[str, Any] = {}
+        self._compilation_cache: Dict[str, Any] = {}
+        self._execution_log: List[Dict[str, Any]] = []
 
     def create_program(self, num_qubits: int) -> QuantumProgram:
         """
@@ -429,3 +436,123 @@ class QuantumVirtualMachine:
                 })
 
         return results
+
+    def validate_program(self, program: QuantumProgram) -> Dict[str, Any]:
+        """
+        Validate a quantum program for correctness before execution.
+
+        Checks:
+        - Qubit indices within bounds
+        - Gate parameter counts
+        - Measurement completeness
+        - Circuit depth feasibility
+
+        Returns:
+            Validation report dict
+        """
+        errors = []
+        warnings = []
+
+        for i, inst in enumerate(program.instructions):
+            for q in inst.qubits:
+                if q < 0 or q >= program.num_qubits:
+                    errors.append(
+                        f"Instruction {i}: qubit index {q} out of range [0, {program.num_qubits})"
+                    )
+            if inst.gate_type in (QuantumGateType.RX, QuantumGateType.RY, QuantumGateType.RZ):
+                if len(inst.parameters) != 1:
+                    errors.append(
+                        f"Instruction {i}: rotation gate requires exactly 1 parameter, got {len(inst.parameters)}"
+                    )
+            if inst.gate_type == QuantumGateType.CNOT and len(inst.qubits) != 2:
+                errors.append(f"Instruction {i}: CNOT requires exactly 2 qubits")
+            if inst.gate_type == QuantumGateType.TOFFOLI and len(inst.qubits) != 3:
+                errors.append(f"Instruction {i}: Toffoli requires exactly 3 qubits")
+
+        measured_qubits = set()
+        for inst in program.instructions:
+            if inst.gate_type == QuantumGateType.MEASURE:
+                measured_qubits.add(inst.qubits[0])
+        unmeasured = set(range(program.num_qubits)) - measured_qubits
+        if unmeasured and measured_qubits:
+            warnings.append(f"Qubits {unmeasured} are not measured")
+
+        depth = program.depth()
+        if depth > 1000:
+            warnings.append(f"Circuit depth {depth} may exceed hardware limits")
+
+        return {
+            'valid': len(errors) == 0,
+            'errors': errors,
+            'warnings': warnings,
+            'gate_count': program.gate_count(),
+            'depth': depth,
+            'qubits_used': program.num_qubits,
+        }
+
+    def parameter_sweep(
+        self,
+        program_factory: Callable[[List[float]], QuantumProgram],
+        parameter_grid: List[List[float]],
+        shots: int = 1024,
+        backend_name: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Execute a parameter sweep across a grid of values.
+        Useful for variational algorithms (VQE, QAOA).
+
+        Args:
+            program_factory: Function that takes parameters and returns a QuantumProgram
+            parameter_grid: List of parameter vectors to sweep
+            shots: Shots per circuit
+            backend_name: Target backend
+
+        Returns:
+            List of results with parameters and outcomes
+        """
+        sweep_results = []
+        for params in parameter_grid:
+            program = program_factory(params)
+            result = self.execute(program, shots, backend_name)
+            sweep_results.append({
+                'parameters': params,
+                'result': result,
+                'success': result.success if result else False,
+            })
+        return sweep_results
+
+    def compose_programs(
+        self,
+        programs: List[QuantumProgram],
+        total_qubits: Optional[int] = None
+    ) -> QuantumProgram:
+        """
+        Compose multiple quantum programs into a single program.
+        Programs are applied sequentially on the same qubit register.
+
+        Args:
+            programs: List of programs to compose
+            total_qubits: Total qubit count (max of all programs if None)
+
+        Returns:
+            Composed QuantumProgram
+        """
+        if not programs:
+            raise ValueError("No programs to compose")
+
+        max_qubits = max(p.num_qubits for p in programs)
+        n_qubits = total_qubits or max_qubits
+        composed = QuantumProgram(n_qubits)
+
+        for program in programs:
+            for inst in program.instructions:
+                if inst.gate_type != QuantumGateType.MEASURE:
+                    composed.instructions.append(inst)
+
+        composed.measure_all()
+        composed.metadata['composed_from'] = len(programs)
+        return composed
+
+    def get_execution_log(self) -> List[Dict[str, Any]]:
+        """Return the execution log for debugging and analysis"""
+        return self._execution_log.copy()

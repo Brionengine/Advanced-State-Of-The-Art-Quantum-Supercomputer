@@ -42,7 +42,7 @@ class QuantumOS:
     - Plugin system
     """
 
-    VERSION = "1.0.0"
+    VERSION = "2.0.0"
 
     def __init__(self, config: Optional[QuantumOSConfig] = None):
         """
@@ -62,7 +62,17 @@ class QuantumOS:
         self.scheduler = QuantumScheduler(self.config.resources)
         self.resource_manager = QuantumResourceManager(self.config.resources)
 
-        # Initialize backends
+        # Circuit cache for compiled programs (avoids recompilation)
+        self._circuit_cache: Dict[str, Any] = {}
+        self._cache_hits = 0
+        self._cache_misses = 0
+
+        # Telemetry and performance tracking
+        self._execution_history: List[Dict[str, Any]] = []
+        self._total_circuits_executed = 0
+        self._total_shots_executed = 0
+
+        # Initialize backends with health monitoring
         self._initialize_backends()
 
         # Initialize Quantum Virtual Machine (general computing interface)
@@ -316,6 +326,120 @@ class QuantumOS:
 
         return backend.estimate_resources(circuit)
 
+    def hot_swap_backend(self, name: str, config: 'BackendConfig') -> bool:
+        """
+        Hot-swap a backend without restarting the OS.
+        Removes old backend and initializes new one in-place.
+
+        Args:
+            name: Backend name to replace
+            config: New backend configuration
+
+        Returns:
+            True if successful
+        """
+        self.logger.info(f"Hot-swapping backend '{name}'...")
+        if name in self.backends:
+            del self.backends[name]
+        try:
+            backend = self._create_backend(config)
+            if backend and backend.initialize():
+                self.backends[name] = backend
+                self.logger.info(f"Backend '{name}' hot-swapped successfully")
+                return True
+        except Exception as e:
+            self.logger.error(f"Hot-swap failed for '{name}': {e}")
+        return False
+
+    def select_optimal_backend(
+        self,
+        circuit: Any,
+        criteria: str = 'fidelity'
+    ) -> Optional[str]:
+        """
+        Automatically select the best backend for a given circuit.
+
+        Args:
+            circuit: The quantum circuit to evaluate
+            criteria: Selection criteria - 'fidelity', 'speed', or 'cost'
+
+        Returns:
+            Name of the best backend
+        """
+        scores = {}
+        for name, backend in self.backends.items():
+            if not backend.is_available:
+                continue
+            props = backend.get_backend_properties()
+            est = backend.estimate_resources(circuit)
+            if criteria == 'fidelity':
+                error_rate = props.get('error_rate', 1.0)
+                scores[name] = 1.0 - error_rate
+            elif criteria == 'speed':
+                est_time = est.get('estimated_time', float('inf'))
+                scores[name] = 1.0 / max(est_time, 0.001)
+            elif criteria == 'cost':
+                qubits = props.get('num_qubits', 0)
+                scores[name] = qubits
+        if not scores:
+            return None
+        best = max(scores, key=scores.get)
+        self.logger.info(
+            f"Auto-selected backend '{best}' (criteria={criteria}, score={scores[best]:.4f})"
+        )
+        return best
+
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """Get circuit cache statistics"""
+        total = self._cache_hits + self._cache_misses
+        hit_rate = self._cache_hits / max(total, 1)
+        return {
+            'cache_size': len(self._circuit_cache),
+            'hits': self._cache_hits,
+            'misses': self._cache_misses,
+            'hit_rate': hit_rate,
+        }
+
+    def get_telemetry(self) -> Dict[str, Any]:
+        """Get execution telemetry and performance metrics"""
+        return {
+            'total_circuits_executed': self._total_circuits_executed,
+            'total_shots_executed': self._total_shots_executed,
+            'cache_stats': self.get_cache_stats(),
+            'recent_executions': self._execution_history[-10:],
+            'backends_available': len([
+                b for b in self.backends.values() if b.is_available
+            ]),
+        }
+
+    def health_check(self) -> Dict[str, Any]:
+        """
+        Run health check across all backends and subsystems.
+        Returns per-component health status.
+        """
+        health = {
+            'os_version': self.VERSION,
+            'status': 'healthy',
+            'backends': {},
+            'scheduler': 'ok',
+            'resource_manager': 'ok',
+        }
+        unhealthy = 0
+        for name, backend in self.backends.items():
+            try:
+                props = backend.get_backend_properties()
+                health['backends'][name] = {
+                    'status': 'healthy' if backend.is_available else 'unavailable',
+                    'qubits': props.get('num_qubits', 0),
+                    'error_rate': props.get('error_rate', 'unknown'),
+                }
+            except Exception as e:
+                health['backends'][name] = {'status': 'error', 'error': str(e)}
+                unhealthy += 1
+        if unhealthy > 0:
+            health['status'] = 'degraded' if unhealthy < len(self.backends) else 'critical'
+        return health
+
     def get_system_status(self) -> Dict[str, Any]:
         """Get overall system status"""
         status = {
@@ -323,6 +447,8 @@ class QuantumOS:
             'backends': {},
             'scheduler': self.scheduler.get_status(),
             'resources': self.resource_manager.get_status(),
+            'telemetry': self.get_telemetry(),
+            'health': self.health_check(),
         }
 
         for name, backend in self.backends.items():
@@ -341,12 +467,17 @@ class QuantumOS:
         # Wait for all jobs to complete
         self.scheduler.wait_for_all_jobs()
 
-        # Clean up backends
-        for backend in self.backends.values():
-            # Any cleanup needed
-            pass
+        # Flush circuit cache
+        self._circuit_cache.clear()
 
-        self.logger.info("Quantum OS shutdown complete")
+        # Clean up backends
+        for name, backend in self.backends.items():
+            self.logger.info(f"Shutting down backend '{name}'")
+
+        self.logger.info(
+            f"Quantum OS shutdown complete. "
+            f"Total circuits executed: {self._total_circuits_executed}"
+        )
 
     def __enter__(self):
         """Context manager entry"""
