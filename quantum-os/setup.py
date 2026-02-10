@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="quantum-os",
-    version="1.0.0",
+    version="2.0.3",
     author="Brionengine Team",
     description="Advanced Quantum Supercomputer Operating System",
     long_description=open("README.md").read(),

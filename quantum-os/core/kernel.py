@@ -42,7 +42,7 @@ class QuantumOS:
     - Plugin system
     """
 
-    VERSION = "2.0.0"
+    VERSION = "2.0.3"
 
     def __init__(self, config: Optional[QuantumOSConfig] = None):
         """

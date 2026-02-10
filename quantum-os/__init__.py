@@ -11,10 +11,10 @@ A unified quantum computing framework supporting:
 - Distributed quantum execution
 
 Author: Brionengine Team
-Version: 1.0.0
+Version: 2.0.3
 """
 
-__version__ = "1.0.0"
+__version__ = "2.0.3"
 __author__ = "Brionengine Team"
 
 # Core components
