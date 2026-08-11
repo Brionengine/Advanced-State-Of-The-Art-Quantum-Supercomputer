@@ -3,8 +3,13 @@ Stabilizer Code Implementation
 
 General stabilizer code framework for quantum error correction
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from typing import List, Dict, Any
 
 

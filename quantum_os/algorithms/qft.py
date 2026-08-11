@@ -1,6 +1,11 @@
 """Quantum Fourier Transform"""
+from __future__ import annotations
+
 from ..core.quantum_vm import QuantumProgram
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 
 class QuantumFourierTransform:
     """Quantum Fourier Transform"""

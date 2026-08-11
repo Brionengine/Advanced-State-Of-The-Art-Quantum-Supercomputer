@@ -15,7 +15,10 @@ from __future__ import annotations
 
 import time
 from typing import Any, Dict, Optional, List
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 
 try:
     import cirq

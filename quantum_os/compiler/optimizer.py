@@ -3,9 +3,14 @@ Quantum Circuit Optimizer
 
 Optimizes quantum circuits for better performance and reduced error rates
 """
+from __future__ import annotations
+
 
 from typing import Any, Dict, List, Optional
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 
 
 class CircuitOptimizer:

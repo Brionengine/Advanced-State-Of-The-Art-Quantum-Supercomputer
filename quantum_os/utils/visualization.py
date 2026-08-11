@@ -1,9 +1,14 @@
 """
 Quantum Circuit and Result Visualization
 """
+from __future__ import annotations
+
 
 from typing import Dict, Any, Optional
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 
 
 class QuantumVisualizer:

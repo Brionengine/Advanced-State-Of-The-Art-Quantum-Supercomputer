@@ -4,8 +4,13 @@ GPU Accelerator for Quantum Simulations
 Provides GPU acceleration for quantum circuit simulation
 using TensorFlow, CuPy, and other GPU libraries
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from typing import Dict, Any, Optional, List
 
 

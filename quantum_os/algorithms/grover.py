@@ -3,8 +3,13 @@ Grover's Search Algorithm
 
 Universal implementation that works on any quantum backend
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from typing import List, Callable, Optional
 from ..core.quantum_vm import QuantumProgram, QuantumGateType
 

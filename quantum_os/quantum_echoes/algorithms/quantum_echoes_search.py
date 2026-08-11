@@ -7,8 +7,13 @@ Includes Grover's algorithm, amplitude amplification, and echo-enhanced search.
 
 This module provides quantum speedup for unstructured search problems.
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from typing import List, Callable, Optional, Dict, Tuple
 import logging
 

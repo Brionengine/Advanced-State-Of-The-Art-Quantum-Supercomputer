@@ -6,8 +6,13 @@ Manages registration and lookup of specialized particles and their properties.
 Provides a centralized database of particle types, their quantum numbers,
 and emission characteristics.
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from dataclasses import dataclass, field
 from typing import Dict, Optional, List, Any
 from enum import Enum

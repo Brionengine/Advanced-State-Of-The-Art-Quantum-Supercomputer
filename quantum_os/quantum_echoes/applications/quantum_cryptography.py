@@ -5,8 +5,13 @@ Post-Quantum Cryptography Application
 Implement post-quantum cryptographic protocols using Quantum Echoes.
 Provides quantum-resistant encryption, signatures, and key exchange.
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from dataclasses import dataclass
 from typing import Tuple, List, Optional, Dict
 import hashlib

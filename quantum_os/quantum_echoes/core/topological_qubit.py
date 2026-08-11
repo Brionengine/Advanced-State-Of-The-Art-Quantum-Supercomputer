@@ -8,8 +8,13 @@ making them inherently protected against local noise and errors.
 
 This module implements anyonic braiding operations and topological gates.
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from enum import Enum
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple, Set

@@ -5,8 +5,13 @@ Anyonic Braiding Operations
 Implements anyonic braiding for fault-tolerant quantum gates and error correction.
 Braiding operations form the foundation of topological quantum computation.
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from dataclasses import dataclass, field
 from typing import List, Dict, Tuple, Optional
 from enum import Enum

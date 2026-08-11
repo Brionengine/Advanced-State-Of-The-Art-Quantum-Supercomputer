@@ -7,6 +7,8 @@ This example demonstrates the true quantum supercomputer capabilities:
 - Automatic distribution across Google Willow, IBM Brisbane, IBM Torino
 - Backend-agnostic quantum programming
 """
+from __future__ import annotations
+
 
 import sys
 sys.path.insert(0, '..')
@@ -18,7 +20,10 @@ from quantum_os import (
     GroverSearch,
     VariationalQuantumEigensolver
 )
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 
 
 def demo_unified_supercomputer_status():

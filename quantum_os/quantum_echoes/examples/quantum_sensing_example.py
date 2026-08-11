@@ -5,13 +5,18 @@ Quantum Sensing Example
 
 Demonstrates ultra-precise magnetometry using quantum echoes.
 """
+from __future__ import annotations
+
 
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from applications.quantum_sensing import QuantumSensor
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 
 
 def main():

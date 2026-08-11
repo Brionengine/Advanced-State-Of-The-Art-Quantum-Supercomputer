@@ -8,12 +8,17 @@ Demonstrates advanced features:
 - High-fidelity qubit operations
 - IBM Brisbane/Torino execution
 """
+from __future__ import annotations
+
 
 import sys
 sys.path.insert(0, '..')
 
 from quantum_os import create_quantum_os, SurfaceCode
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 
 
 def demo_bell_state_fidelity():

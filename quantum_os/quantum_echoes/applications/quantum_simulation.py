@@ -5,8 +5,13 @@ Quantum Simulation Application
 Simulate quantum systems using Quantum Echoes framework.
 Includes molecular simulation, materials science, and quantum chemistry applications.
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from dataclasses import dataclass
 from typing import List, Dict, Tuple, Optional
 import logging

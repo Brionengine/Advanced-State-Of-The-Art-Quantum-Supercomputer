@@ -8,8 +8,13 @@ that propagate and interfere constructively or destructively.
 
 This module enables signal amplification, error detection, and quantum memory.
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from enum import Enum
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Callable

@@ -1,13 +1,18 @@
 """
 Test Error Correction Modules
 """
+from __future__ import annotations
+
 
 import pytest
 import sys
 sys.path.insert(0, '..')
 
 from quantum_os import SurfaceCode, StabilizerCode
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 
 
 def test_surface_code_initialization():

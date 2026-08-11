@@ -7,9 +7,14 @@ Manages quantum computing resources:
 - Distributed computing
 - Resource monitoring
 """
+from __future__ import annotations
+
 
 import time
-import psutil
+try:
+    import psutil
+except ImportError:  # optional dependency: pip install psutil
+    psutil = None
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 import threading

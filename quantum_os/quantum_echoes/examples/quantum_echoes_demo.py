@@ -16,6 +16,8 @@ This demo showcases:
 Author: Quantum Echoes Development Team
 Version: 1.0.0
 """
+from __future__ import annotations
+
 
 import sys
 import os
@@ -23,7 +25,10 @@ import os
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 import logging
 
 # Configure logging

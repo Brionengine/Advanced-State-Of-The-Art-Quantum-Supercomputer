@@ -5,8 +5,13 @@ Echo-Based Stabilizer Measurements
 Implements stabilizer measurements using quantum echoes for
 enhanced error detection.
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from dataclasses import dataclass
 from typing import List, Set
 import logging

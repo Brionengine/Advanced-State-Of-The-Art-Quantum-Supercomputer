@@ -9,8 +9,13 @@ Implements next-generation fault tolerance combining multiple techniques:
 - Multi-level concatenated codes
 - Real-time error rate optimization
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from enum import Enum
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple, Callable

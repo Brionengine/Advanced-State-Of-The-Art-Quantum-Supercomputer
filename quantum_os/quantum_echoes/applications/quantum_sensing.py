@@ -4,8 +4,13 @@ Quantum Sensing Application
 
 Ultra-precise measurements using quantum echoes for enhanced sensitivity.
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from dataclasses import dataclass
 from typing import Optional, Dict
 import logging

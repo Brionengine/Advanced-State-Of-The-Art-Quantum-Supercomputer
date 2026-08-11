@@ -5,6 +5,8 @@ Bell State Creation Example
 
 Simple example demonstrating Bell state creation using Quantum Echoes.
 """
+from __future__ import annotations
+
 
 import sys
 import os
@@ -12,7 +14,10 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from algorithms.quantum_echoes import QuantumEchoesAlgorithm
 from circuits.echo_circuit_builder import build_circuit
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 
 
 def main():

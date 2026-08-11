@@ -11,8 +11,13 @@ This module extends the basic particle emitter with:
 - Particle synthesis and transmutation
 - Automated qubit generation pipeline
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from enum import Enum
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple, Set

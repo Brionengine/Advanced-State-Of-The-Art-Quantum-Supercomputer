@@ -3,8 +3,13 @@ Variational Quantum Eigensolver (VQE)
 
 Universal implementation for finding ground state energies
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from typing import Callable, List, Optional, Dict, Any
 from ..core.quantum_vm import QuantumProgram
 

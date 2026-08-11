@@ -3,8 +3,13 @@ Quantum Error Mitigation Techniques
 
 Error mitigation strategies for NISQ (Noisy Intermediate-Scale Quantum) devices
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from typing import Dict, Any, List, Callable
 
 

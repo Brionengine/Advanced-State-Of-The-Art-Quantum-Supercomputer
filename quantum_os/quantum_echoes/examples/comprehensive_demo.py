@@ -13,6 +13,8 @@ This demo shows:
 5. Real-world applications
 6. Performance benchmarking
 """
+from __future__ import annotations
+
 
 import sys
 import os
@@ -20,7 +22,10 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 import time
 from datetime import datetime, timedelta
 

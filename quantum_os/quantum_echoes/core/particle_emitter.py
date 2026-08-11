@@ -8,8 +8,13 @@ for creating topological qubits with inherent fault tolerance.
 This module provides the fundamental particle emission mechanics that form the basis
 of the Quantum Echoes algorithm.
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from enum import Enum
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple, Callable

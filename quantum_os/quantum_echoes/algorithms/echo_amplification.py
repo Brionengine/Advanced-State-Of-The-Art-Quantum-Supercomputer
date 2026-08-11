@@ -4,8 +4,13 @@ Echo Signal Amplification
 
 Amplify quantum signals using constructive echo interference.
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 import logging
 
 logger = logging.getLogger(__name__)

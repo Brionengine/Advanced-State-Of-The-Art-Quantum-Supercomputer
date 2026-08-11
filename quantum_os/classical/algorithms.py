@@ -3,8 +3,13 @@ Classical Algorithms Library
 
 Standard classical algorithms that can run alongside quantum algorithms
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from typing import List, Any, Callable, Dict, Optional
 
 

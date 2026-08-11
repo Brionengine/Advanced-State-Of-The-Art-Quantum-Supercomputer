@@ -11,6 +11,8 @@ This benchmark suite demonstrates the TRUE exponential quantum advantage with:
 
 These benchmarks show realistic speedups for production-scale quantum computing.
 """
+from __future__ import annotations
+
 
 import sys
 import os
@@ -18,7 +20,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 import time
 import json
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List

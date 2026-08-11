@@ -5,9 +5,14 @@ Provides a general-purpose quantum computing interface that abstracts
 away backend-specific details, enabling any quantum algorithm to run
 on any quantum hardware.
 """
+from __future__ import annotations
+
 
 from typing import Any, Dict, List, Optional, Union, Callable
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from enum import Enum
 
 

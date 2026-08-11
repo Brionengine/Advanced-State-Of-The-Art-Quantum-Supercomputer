@@ -4,8 +4,13 @@ Hybrid Quantum-Classical Optimizer
 Automatically determines whether to use quantum or classical computing
 for maximum performance
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from typing import Dict, Any, Callable, Optional
 from enum import Enum
 

@@ -6,10 +6,15 @@ Supports:
 - Aer simulator (local simulation)
 - Qiskit Runtime for optimized execution
 """
+from __future__ import annotations
+
 
 import time
 from typing import Any, Dict, Optional, List
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 
 try:
     from qiskit import QuantumCircuit as QiskitCircuit, transpile

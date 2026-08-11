@@ -9,12 +9,17 @@ This example demonstrates the TRUE hybrid supercomputer that can run:
 
 This is a general-purpose supercomputer that does EVERYTHING!
 """
+from __future__ import annotations
+
 
 import sys
 sys.path.insert(0, '..')
 
 from quantum_os import create_quantum_os, ClassicalAlgorithms
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 import time
 
 

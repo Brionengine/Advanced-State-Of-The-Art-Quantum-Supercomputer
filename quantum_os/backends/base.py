@@ -1,12 +1,17 @@
 """
 Base abstract classes for quantum backend abstraction layer
 """
+from __future__ import annotations
+
 
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Optional, Union
 from dataclasses import dataclass
 from enum import Enum
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 
 
 class BackendType(Enum):

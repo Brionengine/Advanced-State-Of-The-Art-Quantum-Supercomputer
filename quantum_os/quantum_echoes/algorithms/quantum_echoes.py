@@ -8,8 +8,13 @@ using specialized ion emissions and particle echoes.
 This is the primary interface for running quantum algorithms using the
 Quantum Echoes framework.
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Callable, Tuple
 import logging

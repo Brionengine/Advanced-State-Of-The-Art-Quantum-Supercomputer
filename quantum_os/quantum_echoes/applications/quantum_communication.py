@@ -6,8 +6,13 @@ Secure quantum communication using echo-enhanced protocols.
 Implements quantum key distribution (QKD) and teleportation using
 topological qubits for enhanced security and robustness.
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from dataclasses import dataclass
 from typing import List, Tuple, Optional, Dict
 import logging

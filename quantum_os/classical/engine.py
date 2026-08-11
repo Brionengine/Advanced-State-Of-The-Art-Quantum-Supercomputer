@@ -4,8 +4,13 @@ Classical Computing Engine
 Executes classical algorithms and operations on CPU/GPU,
 integrated with quantum computing capabilities
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from typing import Any, List, Dict, Callable, Optional
 import time
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor

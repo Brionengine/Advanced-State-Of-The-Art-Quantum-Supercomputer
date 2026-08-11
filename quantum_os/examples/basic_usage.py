@@ -7,12 +7,17 @@ Demonstrates core functionality:
 - Using error correction
 - Resource management
 """
+from __future__ import annotations
+
 
 import sys
 sys.path.insert(0, '..')
 
 from quantum_os import create_quantum_os, SurfaceCode
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 
 
 def example_1_basic_circuit():

@@ -10,8 +10,13 @@ Interfaces for using long-lived fault-tolerant qubits in practical applications:
 - Drug discovery and molecular simulation
 - Cryptography and secure communications
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from enum import Enum
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple, Callable, Any

@@ -9,8 +9,13 @@ Goal: Achieve 1 error per billion/trillion operations through:
 - Syndrome measurement
 - Logical qubit encoding
 """
+from __future__ import annotations
 
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # optional dependency: pip install numpy
+    np = None
 from typing import List, Tuple, Dict, Any, Optional
 try:
     import cirq
