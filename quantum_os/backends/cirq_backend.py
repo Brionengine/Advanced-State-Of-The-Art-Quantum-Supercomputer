@@ -7,6 +7,12 @@ Supports:
 - Willow quantum processor (via simulator for now)
 """
 
+# Deferred annotations. Cirq is optional, and several signatures below annotate
+# `cirq.Circuit` / `cirq.Device`; without this, those annotations are evaluated
+# when the class body runs and raise NameError wherever Cirq is absent, despite
+# the CIRQ_AVAILABLE guard.
+from __future__ import annotations
+
 import time
 from typing import Any, Dict, Optional, List
 import numpy as np

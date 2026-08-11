@@ -180,7 +180,7 @@ class TestRunner:
             f.write("## Reproducibility\n\n")
             f.write("To reproduce these results:\n\n")
             f.write("```bash\n")
-            f.write("cd quantum-os/benchmarks\n")
+            f.write("cd quantum_os/benchmarks\n")
             f.write("python run_all_tests.py\n")
             f.write("```\n\n")
 

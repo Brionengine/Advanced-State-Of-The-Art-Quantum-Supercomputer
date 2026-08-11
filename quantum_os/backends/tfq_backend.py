@@ -8,6 +8,13 @@ Supports:
 - Integration with TensorFlow/Keras
 """
 
+# Deferred annotations. TFQ and Cirq are optional, and several signatures below
+# annotate `cirq.Circuit`; without this, those annotations are evaluated when the
+# class body runs and raise NameError on any machine that lacks the optional
+# dependency — taking the whole backends package down with them, despite the
+# TFQ_AVAILABLE guard.
+from __future__ import annotations
+
 import time
 from typing import Any, Dict, Optional, List
 import numpy as np

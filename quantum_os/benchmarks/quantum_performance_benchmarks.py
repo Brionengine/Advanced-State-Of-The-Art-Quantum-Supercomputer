@@ -22,7 +22,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List
 
-# Import quantum-os components
+# Import quantum_os components
 try:
     from quantum_os import create_quantum_os
     from quantum_os.algorithms import GroverSearch, ShorFactoring, VariationalQuantumEigensolver
@@ -535,7 +535,7 @@ class QuantumBenchmarkSuite:
             f.write("## Verification\n\n")
             f.write("These benchmarks are reproducible. To verify:\n\n")
             f.write("```bash\n")
-            f.write("cd quantum-os/benchmarks\n")
+            f.write("cd quantum_os/benchmarks\n")
             f.write("python quantum_performance_benchmarks.py\n")
             f.write("```\n\n")
 

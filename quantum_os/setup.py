@@ -5,7 +5,7 @@ Setup script for Quantum OS
 from setuptools import setup, find_packages
 
 setup(
-    name="quantum-os",
+    name="quantum_os",
     version="2.0.3",
     author="Brionengine Team",
     description="Advanced Quantum Supercomputer Operating System",

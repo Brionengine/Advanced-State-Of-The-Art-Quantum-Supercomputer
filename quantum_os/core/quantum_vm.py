@@ -199,14 +199,67 @@ class QuantumProgram:
             self.metadata['barriers'] = []
         self.metadata['barriers'].append(qubits or list(range(self.num_qubits)))
 
+    def layers(self) -> List[List['QuantumInstruction']]:
+        """
+        Schedule instructions into parallel execution layers.
+
+        Two instructions can share a layer when they touch disjoint qubits —
+        that is what makes circuit depth smaller than gate count. Each
+        instruction is placed in the earliest layer at or after every qubit it
+        touches becomes free.
+
+        Barriers are not represented here: they live in metadata rather than in
+        the instruction stream, so they do not constrain this schedule.
+        """
+        next_free: Dict[int, int] = {}
+        layers: List[List['QuantumInstruction']] = []
+
+        for instruction in self.instructions:
+            earliest = max((next_free.get(q, 0) for q in instruction.qubits),
+                           default=0)
+            while len(layers) <= earliest:
+                layers.append([])
+            layers[earliest].append(instruction)
+            for qubit in instruction.qubits:
+                next_free[qubit] = earliest + 1
+
+        return layers
+
     def depth(self) -> int:
-        """Calculate circuit depth (approximation)"""
-        # Simplified depth calculation
-        return len(self.instructions)
+        """
+        Circuit depth: the number of sequential execution layers.
+
+        This is the critical path through the circuit, not the instruction
+        count — gates acting on disjoint qubits run concurrently. Depth is what
+        decoherence budgets and hardware limits are expressed against, so
+        reporting gate count here made those checks far too pessimistic on wide
+        circuits (a 50-qubit layer of Hadamards has depth 1, not 50).
+        """
+        return len(self.layers())
 
     def gate_count(self) -> int:
         """Count total number of gates"""
         return len([i for i in self.instructions if i.gate_type != QuantumGateType.MEASURE])
+
+    def two_qubit_gate_count(self) -> int:
+        """
+        Count entangling gates.
+
+        Two-qubit gates dominate the error budget on current hardware, so this
+        tracks fidelity far better than a raw gate count does.
+        """
+        return len([
+            i for i in self.instructions
+            if i.gate_type != QuantumGateType.MEASURE and len(i.qubits) == 2
+        ])
+
+    def gate_histogram(self) -> Dict[str, int]:
+        """Count instructions by gate type, measurements included."""
+        histogram: Dict[str, int] = {}
+        for instruction in self.instructions:
+            key = instruction.gate_type.value
+            histogram[key] = histogram.get(key, 0) + 1
+        return histogram
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert program to dictionary"""
@@ -486,6 +539,8 @@ class QuantumVirtualMachine:
             'errors': errors,
             'warnings': warnings,
             'gate_count': program.gate_count(),
+            'two_qubit_gate_count': program.two_qubit_gate_count(),
+            'gate_histogram': program.gate_histogram(),
             'depth': depth,
             'qubits_used': program.num_qubits,
         }
