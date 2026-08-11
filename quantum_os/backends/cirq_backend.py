@@ -158,14 +158,26 @@ class CirqBackend(QuantumBackend):
             num_classical_bits: Ignored for Cirq (measurements handled differently)
 
         Returns:
-            cirq.Circuit object
+            cirq.Circuit object whose qubit register is discoverable via
+            circuit.all_qubits()
         """
         # Create qubits - using GridQubits for realistic topology
         qubits = [cirq.GridQubit(i // 10, i % 10) for i in range(num_qubits)]
         circuit = cirq.Circuit()
 
-        # Store qubits as circuit metadata
-        circuit._qubits = qubits
+        # Pin the register with identity gates.
+        #
+        # Cirq derives all_qubits() from the operations a circuit contains, so
+        # an empty circuit has no qubits no matter how many were allocated here.
+        # This previously stashed them on a private `circuit._qubits` attribute
+        # that Cirq ignores and nothing ever read back, so create_circuit(n)
+        # returned a circuit reporting zero qubits — and every downstream site
+        # in this backend sizes its work off all_qubits().
+        #
+        # Identity is a no-op, so this fixes discovery without altering any
+        # measurement outcome; it costs one leading moment of circuit depth.
+        if num_qubits:
+            circuit.append(cirq.I.on_each(*qubits))
 
         return circuit
 

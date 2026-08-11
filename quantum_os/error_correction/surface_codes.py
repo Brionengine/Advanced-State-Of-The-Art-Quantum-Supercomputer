@@ -27,6 +27,23 @@ class SurfaceCode:
     be scaled to arbitrary code distances for better protection.
     """
 
+    # Scaling prefactor A in P_L ~ A (p/p_th)^floor((d+1)/2), the standard
+    # surface-code approximation (Fowler et al. 2012, "Surface codes: Towards
+    # practical large-scale quantum computation").
+    #
+    # Omitting it makes the model claim a distance-5 code offers no protection
+    # at all: (1e-3 / 1e-2)^3 == 1e-3 lands exactly on the physical error rate,
+    # so can_correct_errors reported False for a code that plainly does correct
+    # errors. It is a class attribute so it can be re-tuned per noise model
+    # alongside ERROR_THRESHOLD.
+    LOGICAL_ERROR_PREFACTOR = 0.03
+
+    # Surface code threshold for the circuit-level noise model.
+    ERROR_THRESHOLD = 0.01
+
+    # Representative physical gate error rate (Google Willow: ~0.1% per gate).
+    DEFAULT_PHYSICAL_ERROR_RATE = 0.001
+
     def __init__(self, code_distance: int = 3):
         """
         Initialize surface code
@@ -50,26 +67,32 @@ class SurfaceCode:
         Calculate logical error rate based on physical error rate
 
         For surface codes:
-        p_L ≈ (p_phys / p_th) ^ ((d+1)/2)
+        p_L ≈ A * (p_phys / p_th) ^ floor((d+1)/2)
 
         where:
         - p_L is logical error rate
         - p_phys is physical error rate
         - p_th is error threshold (~0.01 for surface codes)
         - d is code distance
+        - A is the scaling prefactor (see LOGICAL_ERROR_PREFACTOR)
+
+        The exponent floor((d+1)/2) is the number of physical errors that must
+        coincide to produce an undetected logical error — one more than the
+        t = (d-1)/2 the code can correct.
         """
         # Assume physical error rate from Google Willow/IBM hardware
         # Willow: ~0.001 (0.1% per gate)
-        self.physical_error_rate = 0.001
+        self.physical_error_rate = self.DEFAULT_PHYSICAL_ERROR_RATE
 
         # Surface code threshold
-        self.error_threshold = 0.01
+        self.error_threshold = self.ERROR_THRESHOLD
 
         # Calculate logical error rate
         if self.physical_error_rate < self.error_threshold:
+            exponent = (self.code_distance + 1) // 2
             self.logical_error_rate = (
-                (self.physical_error_rate / self.error_threshold) **
-                ((self.code_distance + 1) / 2)
+                self.LOGICAL_ERROR_PREFACTOR
+                * (self.physical_error_rate / self.error_threshold) ** exponent
             )
         else:
             self.logical_error_rate = 1.0  # Cannot correct errors
@@ -224,16 +247,28 @@ class SurfaceCode:
         Returns:
             Required code distance (odd number)
         """
-        threshold = 0.01
+        threshold = SurfaceCode.ERROR_THRESHOLD
         if physical_error_rate >= threshold:
             raise ValueError("Physical error rate exceeds surface code threshold")
+        if target_error_rate <= 0:
+            raise ValueError("Target error rate must be positive")
 
-        # Solve for d: target = (p_phys / p_th)^((d+1)/2)
-        # d = 2 * log(target) / log(p_phys / p_th) - 1
-
+        # Invert p_L = A * (p_phys / p_th)^floor((d+1)/2), the same relation
+        # _calculate_logical_error_rate applies forward. Dropping the prefactor
+        # here would make the two disagree and over-estimate the distance.
+        #   exponent = log(target / A) / log(p_phys / p_th)
+        #   d        = 2 * exponent - 1
         import math
-        d = 2 * math.log(target_error_rate) / math.log(physical_error_rate / threshold) - 1
-        d = max(3, int(np.ceil(d)))
+
+        prefactor = SurfaceCode.LOGICAL_ERROR_PREFACTOR
+        ratio = physical_error_rate / threshold
+
+        # A target at or above the prefactor is already met by the smallest code.
+        if target_error_rate >= prefactor:
+            return 3
+
+        exponent = math.log(target_error_rate / prefactor) / math.log(ratio)
+        d = max(3, int(np.ceil(2 * exponent - 1)))
 
         # Make odd
         if d % 2 == 0:
